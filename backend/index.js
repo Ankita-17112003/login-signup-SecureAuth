@@ -7,7 +7,6 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 
 const app = express();
-const HOST = "127.0.0.1";
 const PORT = process.env.PORT || 3000;
 
 connectDB();
