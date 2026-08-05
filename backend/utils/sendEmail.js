@@ -10,14 +10,29 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+transporter.verify(function (error, success) {
+  if (error) {
+    console.log(error);
+  } else {
+    console.log("SMTP Connected");
+  }
+});
+
 async function sendEmail(toEmail, otp) {
-  await transporter.sendMail({
-    from: `"Checkpoint" <${process.env.EMAIL_USER}>`,
-    to: toEmail,
-    subject: "Your verification code",
-    text: `Your OTP is ${otp}. It expires in 60 seconds.`,
-    html: `<p>Your verification code is <b>${otp}</b>. It expires in 60 seconds.</p>`,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: `"Checkpoint" <${process.env.EMAIL_USER}>`,
+      to: toEmail,
+      subject: "Your verification code",
+      text: `Your OTP is ${otp}. It expires in 60 seconds.`,
+      html: `<p>Your verification code is <b>${otp}</b>. It expires in 60 seconds.</p>`,
+    });
+
+    console.log("Mail Sent:", info.response);
+  } catch (err) {
+    console.error("Mail Error:", err);
+    throw err;
+  }
 }
 
 module.exports = sendEmail;

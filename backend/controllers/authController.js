@@ -23,8 +23,11 @@ const signup = async (req, res) => {
 
     return res.json({ success: true, message: "OTP sent to your email" });
   } catch (err) {
-    console.log("signup error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    console.error("Signup Error:", err);
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
@@ -65,6 +68,8 @@ const login = async (req, res) => {
 // POST /api/auth/verify-otp
 const verifyOtp = async (req, res) => {
   try {
+   
+
     const userotp = Number(req.body.userotp.join(""));
     const actualotp = req.session.OTP;
     const otpExpireTime = req.session.OTP_EXPIRE;
@@ -91,8 +96,8 @@ const verifyOtp = async (req, res) => {
       req.session.userDtails;
 
     const hashpassword = await bcrypt.hash(userpassword, 10);
-
-    await User.create({
+   
+    const user =  await User.create({
       username,
       useremail,
       userpassword: hashpassword,
@@ -105,8 +110,11 @@ const verifyOtp = async (req, res) => {
 
     return res.json({ success: true, message: "Registration done" });
   } catch (err) {
-    console.log("verifyOtp error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    console.error("verifyOtp error:", err);
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
@@ -114,9 +122,10 @@ const verifyOtp = async (req, res) => {
 const resendOtp = async (req, res) => {
   try {
     if (!req.session.userDtails) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Session expired, please sign up again" });
+      return res.status(400).json({
+        success: false,
+        message: "Session expired, please sign up again",
+      });
     }
 
     const otp = generateOtp();
