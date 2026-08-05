@@ -34,6 +34,8 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.set("trust proxy", 1);
+
 app.use(
   session({
     resave: false,
@@ -42,6 +44,7 @@ app.use(
     cookie: {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       secure: process.env.NODE_ENV === "production",
+       httpOnly: true,
     },
   }),
 );
