@@ -1,34 +1,32 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-transporter.verify(function (error, success) {
-  if (error) {
-    console.log(error);
-  } else {
-    console.log("SMTP Connected");
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function sendEmail(toEmail, otp) {
   try {
-    const info = await transporter.sendMail({
-      from: `"Checkpoint" <${process.env.EMAIL_USER}>`,
-      to: toEmail,
-      subject: "Your verification code",
-      text: `Your OTP is ${otp}. It expires in 60 seconds.`,
-      html: `<p>Your verification code is <b>${otp}</b>. It expires in 60 seconds.</p>`,
+    const { data, error } = await resend.emails.send({
+      from: "SecureAuth <onboarding@resend.dev>",
+      to: [toEmail],
+      subject: "Your SecureAuth verification code",
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>SecureAuth</h2>
+          <p>Your verification code is:</p>
+
+          <h1 style="letter-spacing: 6px;">${otp}</h1>
+
+          <p>This OTP expires in 60 seconds.</p>
+          <p>If you did not request this code, please ignore this email.</p>
+        </div>
+      `,
     });
 
-    console.log("Mail Sent:", info.response);
+    if (error) {
+      console.error("Resend Error:", error);
+      throw new Error(error.message);
+    }
+
+    console.log("OTP Email Sent:", data);
   } catch (err) {
     console.error("Mail Error:", err);
     throw err;
